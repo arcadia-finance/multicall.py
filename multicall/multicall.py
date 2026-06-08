@@ -51,9 +51,7 @@ concat: Final = toolz.concat  # type: ignore [attr-defined]
 mapcat: Final = toolz.mapcat  # type: ignore [attr-defined]
 
 
-def get_args(
-    calls: List[Call], require_success: bool = True
-) -> List[Union[bool, List[List[Any]]]]:
+def get_args(calls: List[Call], require_success: bool = True) -> List[Union[bool, List[List[Any]]]]:
     if any(call.gas is not None for call in calls):
         return [
             [
@@ -111,13 +109,9 @@ class Multicall:
         # aggregate4 only exists in the injected Multicall4, so a gas limit needs a
         # chain that supports state override.
         if self.gas_limited and not state_override_supported(_w3):
-            raise ValueError(
-                "a per-call gas limit requires a chain that supports state override"
-            )
+            raise ValueError("a per-call gas limit requires a chain that supports state override")
         multicall_map = (
-            MULTICALL3_ADDRESSES
-            if chainid in MULTICALL3_ADDRESSES
-            else MULTICALL2_ADDRESSES
+            MULTICALL3_ADDRESSES if chainid in MULTICALL3_ADDRESSES else MULTICALL2_ADDRESSES
         )
         self.multicall_address: Final = multicall_map[chainid]
 
@@ -149,12 +143,8 @@ class Multicall:
         )
         return dict(mapcat(dict.items, concat(batches)))
 
-    def _contract_method(
-        self, request_signature: list, return_signature: tuple
-    ) -> None:
-        self.calls.append(
-            Call(self.multicall_address, request_signature, [return_signature])
-        )
+    def _contract_method(self, request_signature: list, return_signature: tuple) -> None:
+        self.calls.append(Call(self.multicall_address, request_signature, [return_signature]))
 
     def add_base_fee(self, return_signature: tuple = ("base_fee", None)) -> None:
         signature = ["getBasefee()(uint256)"]
@@ -166,9 +156,7 @@ class Multicall:
         signature = ["getBlockHash(uint256)(bytes32)", block_number]
         self._contract_method(signature, return_signature)
 
-    def add_block_number(
-        self, return_signature: tuple = ("block_number", None)
-    ) -> None:
+    def add_block_number(self, return_signature: tuple = ("block_number", None)) -> None:
         signature = ["getBlockNumber()(uint256)"]
         self._contract_method(signature, return_signature)
 
@@ -180,21 +168,15 @@ class Multicall:
         signature = ["getCurrentBlockCoinbase()(address)"]
         self._contract_method(signature, return_signature)
 
-    def add_block_difficulty(
-        self, return_signature: tuple = ("difficulty", None)
-    ) -> None:
+    def add_block_difficulty(self, return_signature: tuple = ("difficulty", None)) -> None:
         signature = ["getCurrentBlockDifficulty()(address)"]
         self._contract_method(signature, return_signature)
 
-    def add_block_gas_limit(
-        self, return_signature: tuple = ("gas_limit", None)
-    ) -> None:
+    def add_block_gas_limit(self, return_signature: tuple = ("gas_limit", None)) -> None:
         signature = ["getCurrentBlockGasLimit()(uint256)"]
         self._contract_method(signature, return_signature)
 
-    def add_block_timestamp(
-        self, return_signature: tuple = ("timestamp", None)
-    ) -> None:
+    def add_block_timestamp(self, return_signature: tuple = ("timestamp", None)) -> None:
         signature = ["getCurrentBlockTimestamp()(uint256)"]
         self._contract_method(signature, return_signature)
 
@@ -204,9 +186,7 @@ class Multicall:
         signature = ["getEthBalance(address)(uint256)", address]
         self._contract_method(signature, return_signature)
 
-    def add_last_block_hash(
-        self, return_signature: tuple = ("last_block_hash", None)
-    ) -> None:
+    def add_last_block_hash(self, return_signature: tuple = ("last_block_hash", None)) -> None:
         signature = ["getLastBlockHash()(bytes32)"]
         self._contract_method(signature, return_signature)
 
@@ -254,9 +234,7 @@ class Multicall:
         if state_override_supported(self.w3):
             # Multicall4 is a superset of Multicall3 (same selectors); inject it only
             # when aggregate4 is needed so the stock path stays byte-for-byte unchanged.
-            override_code = (
-                MULTICALL4_BYTECODE if self.gas_limited else MULTICALL3_BYTECODE
-            )
+            override_code = MULTICALL4_BYTECODE if self.gas_limited else MULTICALL3_BYTECODE
             return Call(
                 self.multicall_address,
                 self.multicall_sig,
