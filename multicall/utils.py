@@ -107,9 +107,7 @@ async def get_async_w3(w3: Web3) -> Web3:
     # pays a fresh TCP+TLS handshake. Under the concurrency Multicall drives this serializes
     # into multi-second latencies and request timeouts. Pre-seed a pooled keep-alive session
     # so connections are reused (no-op for websocket providers).
-    if isinstance(provider, AsyncHTTPProvider) and hasattr(
-        provider, "cache_async_session"
-    ):
+    if isinstance(provider, AsyncHTTPProvider) and hasattr(provider, "cache_async_session"):
         await provider.cache_async_session(
             ClientSession(
                 raise_for_status=True,

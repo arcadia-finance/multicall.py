@@ -4,7 +4,6 @@ from decimal import Decimal
 from multicall import Call, Multicall
 from prometheus_client import start_http_server, Gauge
 
-
 MCD_VAT = "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b"
 MCD_VOW = "0xa950524441892a31ebddf91d3ceefa04bf454466"
 MCD_DAI = "0x6b175474e89094c44da98b954eedeac495271d0f"
@@ -160,9 +159,7 @@ multi = Multicall(
             ["balanceOf(address)(uint256)", MCD_JOIN_SAI],
             [["sai_locked", from_wad]],
         ),
-        Call(
-            MCD_GOV, ["balanceOf(address)(uint256)", GEM_PIT], [["gem_pit", from_wad]]
-        ),
+        Call(MCD_GOV, ["balanceOf(address)(uint256)", GEM_PIT], [["gem_pit", from_wad]]),
         Call(
             ETH,
             ["balanceOf(address)(uint256)", MCD_JOIN_ETH_A],
