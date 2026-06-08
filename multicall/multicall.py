@@ -26,6 +26,7 @@ from multicall.constants import (
     MULTICALL2_ADDRESSES,
     MULTICALL3_ADDRESSES,
     MULTICALL3_BYTECODE,
+    MULTICALL4_BYTECODE,
     w3,
 )
 from multicall.loggers import setup_logger
@@ -53,6 +54,13 @@ mapcat: Final = toolz.mapcat  # type: ignore [attr-defined]
 def get_args(
     calls: List[Call], require_success: bool = True
 ) -> List[Union[bool, List[List[Any]]]]:
+    if any(call.gas is not None for call in calls):
+        return [
+            [
+                [call.target, call.allow_failure, call.value, call.gas or 0, call.data]
+                for call in calls
+            ]
+        ]
     if require_success is True:
         return [[[call.target, call.data] for call in calls]]
     return [require_success, [[call.target, call.data] for call in calls]]
@@ -69,6 +77,7 @@ class Multicall:
         "block_id",
         "require_success",
         "gas_limit",
+        "gas_limited",
         "w3",
         "chainid",
         "multicall_address",
@@ -89,6 +98,8 @@ class Multicall:
         self.block_id = block_id
         self.require_success: Final = require_success
         self.gas_limit: Final = gas_limit
+        # A per-call gas limit routes the batch through Multicall4.aggregate4.
+        self.gas_limited: Final = any(call.gas is not None for call in calls)
         self.w3: Final = _w3
         self.origin: Final = to_checksum_address(origin) if origin else None
         chainid: int = _chain_id if _chain_id is not None else chain_id(_w3)  # type: ignore [assignment]
@@ -97,6 +108,12 @@ class Multicall:
         # with an AsyncWeb3 instance (which would return an unawaited coroutine)
         if _w3 not in chainids:
             chainids[_w3] = chainid
+        # aggregate4 only exists in the injected Multicall4, so a gas limit needs a
+        # chain that supports state override.
+        if self.gas_limited and not state_override_supported(_w3):
+            raise ValueError(
+                "a per-call gas limit requires a chain that supports state override"
+            )
         multicall_map = (
             MULTICALL3_ADDRESSES
             if chainid in MULTICALL3_ADDRESSES
@@ -115,6 +132,8 @@ class Multicall:
 
     @property
     def multicall_sig(self) -> str:
+        if self.gas_limited:
+            return "aggregate4((address,bool,uint256,uint256,bytes)[])((bool,bytes)[])"
         return (
             "aggregate((address,bytes)[])(uint256,bytes[])"
             if self.require_success
@@ -202,7 +221,10 @@ class Multicall:
         async with _get_semaphore():
             try:
                 args = get_args(calls, self.require_success)
-                if self.require_success is True:
+                if self.gas_limited:
+                    # aggregate4 returns Result[(success, bytes)] (like aggregate3Value).
+                    outputs = await self.aggregate.coroutine(args)
+                elif self.require_success is True:
                     self.block_id, outputs = await self.aggregate.coroutine(args)
                     outputs = unpack_aggregate_outputs(outputs)
                 else:
@@ -230,6 +252,11 @@ class Multicall:
     @property
     def aggregate(self) -> Call:
         if state_override_supported(self.w3):
+            # Multicall4 is a superset of Multicall3 (same selectors); inject it only
+            # when aggregate4 is needed so the stock path stays byte-for-byte unchanged.
+            override_code = (
+                MULTICALL4_BYTECODE if self.gas_limited else MULTICALL3_BYTECODE
+            )
             return Call(
                 self.multicall_address,
                 self.multicall_sig,
@@ -238,7 +265,7 @@ class Multicall:
                 block_id=self.block_id,
                 origin=self.origin,
                 gas_limit=self.gas_limit,
-                state_override_code=MULTICALL3_BYTECODE,
+                state_override_code=override_code,
             )
 
         # If state override is not supported, we simply skip it.

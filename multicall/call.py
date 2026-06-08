@@ -42,6 +42,9 @@ class Call:
         "returns",
         "block_id",
         "gas_limit",
+        "gas",
+        "value",
+        "allow_failure",
         "state_override_code",
         "w3",
         "origin",
@@ -58,6 +61,9 @@ class Call:
         returns: Optional[Sequence[Tuple[Any, Callable]]] = None,
         block_id: Optional[int] = None,
         gas_limit: Optional[int] = None,
+        gas: Optional[int] = None,
+        value: int = 0,
+        allow_failure: bool = False,
         state_override_code: Optional[HexStr] = None,
         # This needs to be None in order to use process_pool_executor
         _w3: Optional[Web3] = None,
@@ -67,6 +73,10 @@ class Call:
         self.returns: Final = returns
         self.block_id: Final = block_id
         self.gas_limit: Final = gas_limit
+        # Per-call Call4 fields, used when batched through Multicall.aggregate4.
+        self.gas: Final = gas
+        self.value: Final = value
+        self.allow_failure: Final = allow_failure
         self.state_override_code: Final = state_override_code
         self.w3: Final = _w3
         self.origin: Final = to_checksum_address(origin) if origin else None
