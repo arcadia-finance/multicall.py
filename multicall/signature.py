@@ -1,20 +1,20 @@
 from typing import Any, Dict, Final, List, Optional, Tuple, Union, final
 
-import faster_eth_abi.abi
-import faster_eth_abi.decoding
-import faster_eth_abi.encoding
+import eth_abi.abi
+import eth_abi.decoding
+import eth_abi.encoding
 import eth_hash.auto
 from eth_typing import Decodable, TypeStr
 
 _SIGNATURES: Final[Dict[str, "Signature"]] = {}
 
-TupleEncoder: Final = faster_eth_abi.encoding.TupleEncoder
-TupleDecoder: Final = faster_eth_abi.decoding.TupleDecoder
+TupleEncoder: Final = eth_abi.encoding.TupleEncoder
+TupleDecoder: Final = eth_abi.decoding.TupleDecoder
 
 _keccak: Final = eth_hash.auto.keccak
-_get_encoder: Final = faster_eth_abi.abi.default_codec._registry.get_encoder
-_get_decoder: Final = faster_eth_abi.abi.default_codec._registry.get_decoder
-_stream_cls: Final = faster_eth_abi.abi.default_codec.stream_class
+_get_encoder: Final = eth_abi.abi.default_codec._registry.get_encoder
+_get_decoder: Final = eth_abi.abi.default_codec._registry.get_decoder
+_stream_cls: Final = eth_abi.abi.default_codec.stream_class
 
 
 def get_4byte_selector(signature: str) -> bytes:
