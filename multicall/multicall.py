@@ -20,6 +20,11 @@ from eth_typing import AnyAddress
 from eth_utils import toolz
 from web3 import Web3
 
+try:
+    from web3.exceptions import Web3RPCError
+except ImportError:  # web3 < 7 surfaces RPC errors as ValueError
+    Web3RPCError = None
+
 from multicall.call import Call
 from multicall.constants import (
     GAS_LIMIT,
@@ -348,6 +353,18 @@ def _raise_or_proceed(e: Exception, ct_calls: int, ConnErr_retries: int) -> None
         pass
     elif isinstance(e, ValueError):
         if "out of gas" not in str(e).lower():
+            raise e
+        if ct_calls == 1:
+            raise e
+        log_warning(e)
+    elif Web3RPCError is not None and isinstance(e, Web3RPCError):
+        strings = (
+            "out of gas",
+            "request body size limit",
+            "request entity too large",
+            "payload too large",
+        )
+        if not any(map(str(e).lower().__contains__, strings)):
             raise e
         if ct_calls == 1:
             raise e
