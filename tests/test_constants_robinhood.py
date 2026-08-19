@@ -32,8 +32,6 @@ def test_robinhood_supports_state_override():
 def test_multicall_address_lookup_resolves_for_robinhood():
     # This is the lookup that raises KeyError today (multicall.py, multicall_map[chainid]).
     chainid = 4663
-    multicall_map = (
-        MULTICALL3_ADDRESSES if chainid in MULTICALL3_ADDRESSES else None
-    )
+    multicall_map = MULTICALL3_ADDRESSES if chainid in MULTICALL3_ADDRESSES else None
     assert multicall_map is not None
     assert multicall_map[chainid] == CANONICAL_MULTICALL3
