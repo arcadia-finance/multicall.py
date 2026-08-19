@@ -3,6 +3,7 @@
 These tests are self-contained (no network, no brownie); run with:
     pytest --noconftest tests/test_raise_or_proceed.py
 """
+
 import pytest
 from web3.exceptions import Web3RPCError
 

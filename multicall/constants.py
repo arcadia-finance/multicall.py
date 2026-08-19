@@ -73,6 +73,7 @@ class Network(IntEnum):
     Milkomeda = 2001
     Kava = 2222
     FantomTestnet = 4002
+    Robinhood = 4663
     Canto = 7700
     Klaytn = 8217
     Base = 8453
@@ -196,6 +197,7 @@ MULTICALL3_ADDRESSES: Final[Dict[int, ChecksumAddress]] = {
     Network.PulseChain: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.PulseChainTestnet: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Base: "0xcA11bde05977b3631167028862bE2a173976CA11",
+    Network.Robinhood: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Holesky: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Sei: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Hoodi: "0xca11bde05977b3631167028862be2a173976ca11",
