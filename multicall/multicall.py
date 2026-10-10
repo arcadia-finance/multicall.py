@@ -222,6 +222,10 @@ class Multicall:
                 return outputs
             except Exception as e:
                 _raise_or_proceed(e, len(calls), ConnErr_retries=ConnErr_retries)
+                # A single call cannot be split any further, so rebatching it would retry
+                # the same request forever: surface the error to the caller instead.
+                if len(calls) <= 1:
+                    raise
 
         # Failed, we need to rebatch the calls and try again.
         batch_results = await gather(
@@ -278,17 +282,11 @@ class NotSoBrightBatcher:
 
     def batch_calls(self, calls: List[Call], step: int) -> List[List[Call]]:
         """
-        Batch calls into chunks of size `self.step`.
+        Batch calls into chunks of at most `step` calls (at least 1), covering every call.
+        An empty list yields one empty batch.
         """
-        batches = []
-        start = 0
-        done = len(calls) - 1
-        while True:
-            end = start + step
-            batches.append(calls[start:end])
-            if end >= done:
-                return batches
-            start = end
+        step = max(1, step)
+        return [calls[start : start + step] for start in range(0, len(calls), step)] or [calls]
 
     def split_calls(
         self, calls: List[Call], unused: Optional[int] = None
@@ -309,7 +307,7 @@ class NotSoBrightBatcher:
 
         # Otherwise we will split calls in half.
         if self.step >= len(calls):
-            new_step = round(len(calls) * 0.99) if len(calls) >= 100 else len(calls) - 1
+            new_step = max(1, round(len(calls) * 0.99) if len(calls) >= 100 else len(calls) - 1)
             log_warning(
                 f"Multicall batch size reduced from {self.step} to {new_step}. The failed batch had {len(calls)} calls."
             )
