@@ -107,13 +107,19 @@ async def get_async_w3(w3: Web3) -> Web3:
     # pays a fresh TCP+TLS handshake. Under the concurrency Multicall drives this serializes
     # into multi-second latencies and request timeouts. Pre-seed a pooled keep-alive session
     # so connections are reused (no-op for websocket providers).
+    session = None
     if isinstance(provider, AsyncHTTPProvider) and hasattr(provider, "cache_async_session"):
-        await provider.cache_async_session(
-            ClientSession(
-                raise_for_status=True,
-                connector=TCPConnector(limit=_KEEPALIVE_CONNECTION_LIMIT),
-            )
+        session = ClientSession(
+            raise_for_status=True,
+            connector=TCPConnector(limit=_KEEPALIVE_CONNECTION_LIMIT),
         )
+        await provider.cache_async_session(session)
+
+    # A concurrent first call for the same w3 got here first while we awaited.
+    if w3 in async_w3s:
+        if session is not None:
+            await session.close()
+        return async_w3s[w3]
 
     async_w3s[w3] = async_w3  # type: ignore [assignment]
     return async_w3  # type: ignore [return-value]
