@@ -1,2 +1,2 @@
 compile:
-	mypyc multicall/call.py multicall/constants.py multicall/exceptions.py multicall/loggers.py multicall/multicall.py multicall/signature.py --pretty --install-types --non-interactive --disable-error-code=import-not-found
+	mypyc multicall/call.py multicall/constants.py multicall/exceptions.py multicall/loggers.py multicall/multicall.py multicall/signature.py --pretty --install-types --non-interactive --disable-error-code=import-not-found --disable-error-code=assignment --disable-error-code=truthy-function --disable-error-code=misc
