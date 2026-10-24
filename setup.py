@@ -171,9 +171,9 @@ with open("readme.md", "r", encoding="utf-8") as readme:
 
 
 setup(
-    name=poetry_config["name"].replace("-", "_"),
+    name=pyproject_data["project"]["name"].replace("-", "_"),
     version="0.15.1",
-    description=poetry_config["description"],
+    description=pyproject_data["project"]["description"],
     python_requires=">=3.10,<4",
     packages=find_packages(),
     package_data={"multicall": ["py.typed"]},

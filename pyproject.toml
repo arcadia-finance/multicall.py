@@ -16,14 +16,14 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
+[tool.setuptools.packages.find]
+include = ["multicall*"]
+
 [tool.setuptools.dynamic.readme]
 file = "readme.md"
 
 [tool.poetry]
-name = "multicall"
 version = "0.15.1"
-description = "aggregate results from multiple ethereum contract calls"
-authors = ["banteg"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
