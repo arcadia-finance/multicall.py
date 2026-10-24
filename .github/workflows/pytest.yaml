@@ -69,4 +69,4 @@ jobs:
         run: poetry run python -m pip install .
 
       - name: Run test suite
-        run: poetry run pytest --noconftest tests/test_async_w3.py tests/test_batcher.py tests/test_constants_robinhood.py tests/test_raise_or_proceed.py tests/test_signature.py
+        run: poetry run pytest --noconftest --ignore=tests/test_call.py --ignore=tests/test_multicall.py --ignore=tests/test_utils.py
