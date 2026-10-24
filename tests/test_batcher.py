@@ -38,6 +38,10 @@ def test_rebatch_never_sets_the_step_below_one(n):
     assert batcher.step >= 1
 
 
+@pytest.mark.skipif(
+    multicall_module.__file__.endswith(".so"),
+    reason="mypyc compiles Multicall to a native class, which cannot be monkeypatched",
+)
 def test_a_single_call_that_keeps_timing_out_raises_instead_of_rebatching(monkeypatch):
     class _TimingOut:
         async def coroutine(self, args):

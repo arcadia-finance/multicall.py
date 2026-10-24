@@ -141,10 +141,10 @@ class Multicall:
 
     async def coroutine(self) -> Dict[str, Any]:
         batches = await gather(
-            (
+            [
                 self.fetch_outputs(batch, id=str(i))
                 for i, batch in enumerate(batcher.batch_calls(self.calls, batcher.step))
-            )
+            ]
         )
         return dict(mapcat(dict.items, concat(batches)))
 
@@ -229,10 +229,10 @@ class Multicall:
 
         # Failed, we need to rebatch the calls and try again.
         batch_results = await gather(
-            (
+            [
                 self.fetch_outputs(chunk, ConnErr_retries + 1, f"{id}_{i}")
                 for i, chunk in enumerate(batcher.rebatch(calls))
-            )
+            ]
         )
 
         log_debug("coroutine %s finished", id)
