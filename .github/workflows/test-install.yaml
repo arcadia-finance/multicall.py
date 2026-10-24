@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Poetry (for poetry install test)
         if: ${{ matrix.os != 'windows-latest' }}
-        run: pip install poetry
+        run: pip install poetry==2.5.1
         shell: bash
 
       - name: pip install .
@@ -61,7 +61,6 @@ jobs:
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
           poetry install
-          poetry run pip install -U setuptools
         shell: bash
         
       - name: Test import after poetry install

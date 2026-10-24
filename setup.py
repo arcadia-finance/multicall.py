@@ -171,9 +171,9 @@ with open("readme.md", "r", encoding="utf-8") as readme:
 
 
 setup(
-    name=poetry_config["name"].replace("-", "_"),
+    name=pyproject_data["project"]["name"].replace("-", "_"),
     version="0.15.1",
-    description=poetry_config["description"],
+    description=pyproject_data["project"]["description"],
     python_requires=">=3.10,<4",
     packages=find_packages(),
     package_data={"multicall": ["py.typed"]},
@@ -183,15 +183,4 @@ setup(
     install_requires=poetry_dependencies_to_install_requires(poetry_config["dependencies"]),
     ext_modules=ext_modules,
     zip_safe=False,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3.13",
-        "Operating System :: OS Independent",
-        "Topic :: Software Development :: Libraries",
-    ],
 )

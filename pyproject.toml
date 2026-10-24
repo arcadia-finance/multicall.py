@@ -3,19 +3,27 @@ name = "multicall"
 description = "aggregate results from multiple ethereum contract calls"
 requires-python = ">=3.10,<4"
 authors = [{ name = "banteg" }]
-dynamic = ["version", "dependencies", "readme", "classifiers"]
+dynamic = ["version", "dependencies", "readme"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+]
+
+[tool.setuptools.packages.find]
+include = ["multicall*"]
 
 [tool.setuptools.dynamic.readme]
 file = "readme.md"
 
-[tool.setuptools.dynamic.classifiers]
-file = "attr:classifiers"
-
 [tool.poetry]
-name = "multicall"
 version = "0.15.1"
-description = "aggregate results from multiple ethereum contract calls"
-authors = ["banteg"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
@@ -26,25 +34,12 @@ web3 = ">=5.27,!=5.29.*,!=5.30.*,!=5.31.0,!=5.31.1,!=5.31.2"
 eth_retry = ">=0.3.5"
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">=6.2.5"
+pytest = ">=9.0.3"
 ruff = ">=0.3.5"
 joblib = ">=1.2"
-eth-brownie = ">=1.21,<1.22"
-
-aiohttp = { "version" = "*", python = ">=3.10,<4" }
-frozenlist = { "version" = "*", python = ">=3.10,<4" }
-jsonschema-specifications = { "version" = "*", python = ">=3.10,<4" }
-importlib-resources = { "version" = "*", python = ">=3.10,<4" }
-multidict = { "version" = "*", python = ">=3.10,<4" }
-pkgutil-resolve-name = { "version" = "*", python = ">=3.10,<4" }
-pluggy = { "version" = "*", python = ">=3.10,<4" }
-protobuf = { "version" = "*", python = ">=3.10,<4" }
-pydantic = { "version" = "*", python = ">=3.10,<4" }
-referencing = { "version" = "*", python = ">=3.10,<4" }
-rpds-py = { "version" = "*", python = ">=3.10,<4" }
-urllib3 = { "version" = "*", python = ">=3.10,<4" }
-websockets = { "version" = "*", python = ">=3.10,<4" }
-yarl = { "version" = "*", python = ">=3.10,<4" }
+aiohttp = "3.14.4"
+types-requests = "2.33.0.20260712"
+tomli = { version = "2.2.1", python = "<3.11" }
 
 [build-system]
 requires = [
@@ -55,3 +50,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 100
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:websockets.legacy is deprecated:DeprecationWarning",
+]

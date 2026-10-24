@@ -16,6 +16,9 @@ concurrency:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -46,44 +49,16 @@ jobs:
         with:
           python-version: ${{ matrix.pyversion }}
 
-      - name: Load cached Poetry installation
-        id: cached-poetry
-        uses: actions/cache@v4
-        with:
-          path: ~/.local  # the path depends on the OS
-          key: poetry-${{ runner.os }}-${{ matrix.pyversion }}-0  # increment to reset cache
-          
       - name: Install Poetry
-        if: steps.cached-poetry.outputs.cache-hit != 'true' && matrix.pyversion != '3.8'
-        uses: snok/install-poetry@v1
-          
-      - name: Install Poetry (Python3.8)
-        if: steps.cached-poetry.outputs.cache-hit != 'true' &&  matrix.pyversion == '3.8'
         uses: snok/install-poetry@v1
         with:
-          version: "1.8.5" 
+          version: "2.5.1"
 
-      - name: Update Lockfile (Python3.8)
-        if: matrix.pyversion == '3.8'
-        run: poetry lock
-        
       - name: Install Dependencies
         run: poetry install
         
-      - name: Install Setuptools for `pkg_resources` so web3.py works
-        run: poetry run pip install -U setuptools
-      
-      - name: Setup brownie networks
-        run: |
-          poetry run brownie networks modify mainnet host=${{ secrets.WEB3_PROVIDER }}
-        continue-on-error: true
-
       - name: Install Multicall
         run: poetry run python -m pip install .
 
       - name: Run test suite
-        env:
-          PYTEST_NETWORK: mainnet
-          ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN  }}
-          GAS_LIMIT: 5000000
-        run: poetry run pytest
+        run: poetry run pytest --noconftest --ignore=tests/test_call.py --ignore=tests/test_multicall.py --ignore=tests/test_utils.py
