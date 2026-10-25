@@ -36,3 +36,15 @@ def test_web3rpcerror_body_size_limit_is_rebatchable():
 def test_web3rpcerror_unrelated_raises():
     with pytest.raises(Web3RPCError):
         _raise_or_proceed(Web3RPCError("execution reverted"), ct_calls=100, ConnErr_retries=0)
+
+
+EVM_TIMEOUT_MSG = "{'code': -32000, 'message': 'execution aborted (timeout = 5s)'}"
+
+
+def test_web3rpcerror_evm_timeout_is_rebatchable():
+    _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=100, ConnErr_retries=0)
+
+
+def test_web3rpcerror_evm_timeout_single_call_raises():
+    with pytest.raises(Web3RPCError):
+        _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=1, ConnErr_retries=0)

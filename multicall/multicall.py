@@ -340,6 +340,7 @@ def _raise_or_proceed(e: Exception, ct_calls: int, ConnErr_retries: int) -> None
     elif isinstance(e, Web3RPCError):
         strings = (
             "out of gas",
+            "execution aborted (timeout",
             "request body size limit",
             "request entity too large",
             "payload too large",
