@@ -1,21 +1,13 @@
-# mypy: disable-error-code="attr-defined"
+from collections.abc import Callable, Generator, Sequence
 from typing import (
     Any,
-    Callable,
     Final,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
     final,
 )
 
-import eth_retry
+from eth_abi.exceptions import DecodingError
 from eth_typing import Address, ChecksumAddress, HexAddress, HexStr
 from eth_typing.abi import Decodable
-from eth_utils import to_checksum_address
 from web3 import Web3
 
 from multicall.constants import Network, w3
@@ -27,47 +19,48 @@ from multicall.utils import (
     chain_id,
     get_async_w3,
     state_override_supported,
+    to_checksum_address,
 )
 
 logger: Final = setup_logger(__name__)
 log_debug: Final = logger.debug
 
-AnyAddress = Union[str, Address, ChecksumAddress, HexAddress]
+AnyAddress = str | Address | ChecksumAddress | HexAddress
 
 
 @final
 class Call:
     __slots__ = (
-        "target",
-        "returns",
-        "block_id",
-        "gas_limit",
-        "gas",
-        "value",
         "allow_failure",
-        "state_override_code",
-        "w3",
-        "origin",
-        "function",
         "args",
+        "block_id",
+        "function",
+        "gas",
+        "gas_limit",
+        "origin",
+        "returns",
         "signature",
+        "state_override_code",
+        "target",
+        "value",
+        "w3",
     )
 
     def __init__(
         self,
         target: AnyAddress,
         # 'funcName(dtype)(dtype)' or ['funcName(dtype)(dtype)', input0, input1, ...]
-        function: Union[str, List[Union[str, Any]]],
-        returns: Optional[Sequence[Tuple[Any, Callable]]] = None,
-        block_id: Optional[int] = None,
-        gas_limit: Optional[int] = None,
-        gas: Optional[int] = None,
+        function: str | list[str | Any],
+        returns: Sequence[tuple[Any, Callable]] | None = None,
+        block_id: int | None = None,
+        gas_limit: int | None = None,
+        gas: int | None = None,
         value: int = 0,
         allow_failure: bool = False,
-        state_override_code: Optional[HexStr] = None,
+        state_override_code: HexStr | None = None,
         # This needs to be None in order to use process_pool_executor
-        _w3: Optional[Web3] = None,
-        origin: Optional[AnyAddress] = None,
+        _w3: Web3 | None = None,
+        origin: AnyAddress | None = None,
     ) -> None:
         self.target: Final = to_checksum_address(target)
         self.returns: Final = returns
@@ -101,8 +94,8 @@ class Call:
     def decode_output(
         output: Decodable,
         signature: Signature,
-        returns: Optional[Sequence[Tuple[Any, Optional[Callable]]]] = None,
-        success: Optional[bool] = None,
+        returns: Sequence[tuple[Any, Callable | None]] | None = None,
+        success: bool | None = None,
     ) -> Any:
         if success is None:
             apply_handler = lambda handler, value: handler(value)
@@ -112,7 +105,7 @@ class Call:
         if success is None or success:
             try:
                 decoded = signature.decode_data(output)
-            except:
+            except DecodingError, OverflowError, UnicodeDecodeError:
                 success, decoded = False, [None] * (len(returns) if returns else 1)
         else:
             decoded = [None] * (len(returns) if returns else 1)
@@ -125,13 +118,12 @@ class Call:
         else:
             return decoded if len(decoded) > 1 else decoded[0]
 
-    @eth_retry.auto_retry(min_sleep_time=1, max_sleep_time=3)
     def __call__(
         self,
-        args: Optional[Any] = None,
-        _w3: Optional[Web3] = None,
+        args: Any | None = None,
+        _w3: Web3 | None = None,
         *,
-        block_id: Optional[int] = None,
+        block_id: int | None = None,
     ) -> Any:
         _w3 = self.w3 or _w3 or w3
         args = prep_args(
@@ -154,13 +146,12 @@ class Call:
     def __await__(self) -> Generator[Any, Any, Any]:
         return self.coroutine().__await__()
 
-    @eth_retry.auto_retry(min_sleep_time=1, max_sleep_time=3)
     async def coroutine(
         self,
-        args: Optional[Any] = None,
-        _w3: Optional[Web3] = None,
+        args: Any | None = None,
+        _w3: Web3 | None = None,
         *,
-        block_id: Optional[int] = None,
+        block_id: int | None = None,
     ) -> Any:
         _w3 = self.w3 or _w3 or w3
 
@@ -190,12 +181,12 @@ class Call:
 def prep_args(
     target: str,
     signature: Signature,
-    args: Optional[Any],
-    block_id: Optional[int],
-    origin: Optional[ChecksumAddress],
-    gas_limit: Optional[int],
-    state_override_code: Optional[HexStr],
-) -> List[Any]:
+    args: Any | None,
+    block_id: int | None,
+    origin: ChecksumAddress | None,
+    gas_limit: int | None,
+    state_override_code: HexStr | None,
+) -> list[Any]:
     calldata = signature.encode_data(args)
 
     call_dict = {"to": target, "data": calldata}

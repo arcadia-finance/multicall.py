@@ -1,7 +1,7 @@
 """Unit tests for NotSoBrightBatcher and the single-call rebatch guard.
 
-Self-contained (no network, no brownie); run with:
-    pytest --noconftest tests/test_batcher.py
+Self-contained (no network); run with:
+    pytest tests/test_batcher.py
 """
 
 import asyncio
@@ -12,7 +12,7 @@ from multicall import multicall as multicall_module
 from multicall.multicall import Multicall, NotSoBrightBatcher
 
 
-@pytest.mark.parametrize("n", range(0, 40))
+@pytest.mark.parametrize("n", range(40))
 @pytest.mark.parametrize("step", [1, 2, 3, 5, 9, 10, 39, 40, 10000])
 def test_batch_calls_covers_every_call_in_order(n, step):
     calls = list(range(n))
@@ -38,10 +38,6 @@ def test_rebatch_never_sets_the_step_below_one(n):
     assert batcher.step >= 1
 
 
-@pytest.mark.skipif(
-    multicall_module.__file__.endswith(".so"),
-    reason="mypyc compiles Multicall to a native class, which cannot be monkeypatched",
-)
 def test_a_single_call_that_keeps_timing_out_raises_instead_of_rebatching(monkeypatch):
     class _TimingOut:
         async def coroutine(self, args):
@@ -54,7 +50,7 @@ def test_a_single_call_that_keeps_timing_out_raises_instead_of_rebatching(monkey
     mc.gas_limited = False
     before = multicall_module.batcher.step
 
-    with pytest.raises(TimeoutError):
+    with pytest.raises(TimeoutError, match="node did not answer"):
         asyncio.run(asyncio.wait_for(mc.fetch_outputs(["only-call"]), timeout=5))
 
     assert multicall_module.batcher.step == before

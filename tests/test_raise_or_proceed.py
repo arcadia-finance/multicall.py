@@ -1,7 +1,7 @@
 """Unit tests for _raise_or_proceed error classification.
 
-These tests are self-contained (no network, no brownie); run with:
-    pytest --noconftest tests/test_raise_or_proceed.py
+These tests are self-contained (no network); run with:
+    pytest tests/test_raise_or_proceed.py
 """
 
 import pytest
@@ -38,6 +38,13 @@ def test_web3rpcerror_unrelated_raises():
         _raise_or_proceed(Web3RPCError("execution reverted"), ct_calls=100, ConnErr_retries=0)
 
 
-def test_valueerror_out_of_gas_still_rebatchable():
-    # web3 < 7 surfaces RPC errors as ValueError; behavior must be preserved.
-    _raise_or_proceed(ValueError(OUT_OF_GAS_MSG), ct_calls=100, ConnErr_retries=0)
+EVM_TIMEOUT_MSG = "{'code': -32000, 'message': 'execution aborted (timeout = 5s)'}"
+
+
+def test_web3rpcerror_evm_timeout_is_rebatchable():
+    _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=100, ConnErr_retries=0)
+
+
+def test_web3rpcerror_evm_timeout_single_call_raises():
+    with pytest.raises(Web3RPCError):
+        _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=1, ConnErr_retries=0)
