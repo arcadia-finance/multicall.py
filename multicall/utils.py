@@ -1,8 +1,16 @@
 # mypy: disable-error-code="attr-defined"
-import threading
-from asyncio import AbstractEventLoop, Semaphore, get_running_loop, new_event_loop, set_event_loop
+import sys
+from asyncio import (
+    AbstractEventLoop,
+    Semaphore,
+    get_event_loop_policy,
+    get_running_loop,
+    new_event_loop,
+    set_event_loop,
+)
 from asyncio import gather as _gather
-from typing import Any, Awaitable, Dict, Final, Iterable, List, TypeVar
+from asyncio import get_event_loop as _get_event_loop
+from typing import Any, Awaitable, Dict, Final, Iterable, List, Optional, TypeVar
 
 import eth_retry
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
@@ -125,7 +133,13 @@ async def get_async_w3(w3: Web3) -> Web3:
     return async_w3  # type: ignore [return-value]
 
 
-_thread_loops = threading.local()
+def _current_loop() -> Optional[AbstractEventLoop]:
+    if sys.version_info >= (3, 14):
+        try:
+            return _get_event_loop()
+        except RuntimeError:
+            return None
+    return getattr(getattr(get_event_loop_policy(), "_local", None), "_loop", None)
 
 
 def get_event_loop() -> AbstractEventLoop:
@@ -133,11 +147,10 @@ def get_event_loop() -> AbstractEventLoop:
         return get_running_loop()
     except RuntimeError:
         pass
-    loop = getattr(_thread_loops, "loop", None)
+    loop = _current_loop()
     if loop is None or loop.is_closed():
         loop = new_event_loop()
         set_event_loop(loop)
-        _thread_loops.loop = loop
     return loop
 
 
