@@ -1,7 +1,7 @@
 # mypy: disable-error-code="attr-defined"
-from asyncio import AbstractEventLoop, Semaphore, new_event_loop, set_event_loop
+import threading
+from asyncio import AbstractEventLoop, Semaphore, get_running_loop, new_event_loop, set_event_loop
 from asyncio import gather as _gather
-from asyncio import get_event_loop as _get_event_loop
 from typing import Any, Awaitable, Dict, Final, Iterable, List, TypeVar
 
 import eth_retry
@@ -125,14 +125,19 @@ async def get_async_w3(w3: Web3) -> Web3:
     return async_w3  # type: ignore [return-value]
 
 
+_thread_loops = threading.local()
+
+
 def get_event_loop() -> AbstractEventLoop:
     try:
-        loop = _get_event_loop()
-    except RuntimeError as e:  # Necessary for use with multi-threaded applications.
-        if not str(e).startswith("There is no current event loop in thread"):
-            raise e
+        return get_running_loop()
+    except RuntimeError:
+        pass
+    loop = getattr(_thread_loops, "loop", None)
+    if loop is None or loop.is_closed():
         loop = new_event_loop()
         set_event_loop(loop)
+        _thread_loops.loop = loop
     return loop
 
 
