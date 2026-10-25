@@ -403,21 +403,6 @@ files = [
 ]
 
 [[package]]
-name = "cchecksum"
-version = "0.2.6"
-description = "A ~8x faster drop-in replacement for eth_utils.to_checksum_address. Raises the exact same Exceptions. Implemented in C."
-optional = false
-python-versions = "<4,>=3.8"
-groups = ["main"]
-files = [
-    {file = "cchecksum-0.2.6.tar.gz", hash = "sha256:d3f8c71ef52811496ae7e0e6209fcac15fe89985ce1933f52fc0a95949097b13"},
-]
-
-[package.dependencies]
-eth-typing = "*"
-eth-utils = "*"
-
-[[package]]
 name = "certifi"
 version = "2026.10.19"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -2256,4 +2241,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "b68c71ad58badeafb1153ea80e60cf852d6e14f612eae9dc3604397fe351ce6a"
+content-hash = "3150100118b4c44480c482ea01618d45319aa993ebee5ab615c3833623bb39d2"

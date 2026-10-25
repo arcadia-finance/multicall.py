@@ -14,10 +14,9 @@ from typing import (
 )
 
 import aiohttp
-import cchecksum
 import requests
 from eth_typing import AnyAddress
-from eth_utils import toolz
+from eth_utils import to_checksum_address, toolz
 from web3 import Web3
 
 try:
@@ -49,8 +48,6 @@ log_warning: Final = logger.warning
 log_debug: Final = logger.debug
 
 CallResponse = Tuple[Union[None, bool], bytes]
-
-to_checksum_address: Final = cchecksum.to_checksum_address
 
 concat: Final = toolz.concat  # type: ignore [attr-defined]
 mapcat: Final = toolz.mapcat  # type: ignore [attr-defined]
