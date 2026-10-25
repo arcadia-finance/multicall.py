@@ -1,34 +1,24 @@
 import asyncio
 import subprocess
 import sys
-import threading
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 
 from multicall.utils import await_awaitable, get_event_loop
 
 
 def _in_fresh_thread(fn):
-    result = {}
-
     def target():
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             try:
-                result["value"] = fn()
-            except BaseException as e:
-                result["error"] = e
-            try:
+                return fn()
+            finally:
                 get_event_loop().close()
                 asyncio.set_event_loop(None)
-            except BaseException as e:
-                result.setdefault("error", e)
 
-    thread = threading.Thread(target=target)
-    thread.start()
-    thread.join()
-    if "error" in result:
-        raise result["error"]
-    return result["value"]
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(target).result()
 
 
 def test_no_loop_gives_one_reused_loop_without_warnings():

@@ -1,15 +1,9 @@
 from asyncio import TimeoutError
+from collections.abc import Generator, Sequence
 from time import time
 from typing import (
     Any,
-    Dict,
     Final,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
     final,
 )
 
@@ -18,11 +12,7 @@ import requests
 from eth_typing import AnyAddress
 from eth_utils import to_checksum_address, toolz
 from web3 import Web3
-
-try:
-    from web3.exceptions import Web3RPCError
-except ImportError:  # web3 < 7 surfaces RPC errors as ValueError
-    Web3RPCError = None
+from web3.exceptions import Web3RPCError
 
 from multicall.call import Call
 from multicall.constants import (
@@ -47,13 +37,13 @@ logger: Final = setup_logger(__name__)
 log_warning: Final = logger.warning
 log_debug: Final = logger.debug
 
-CallResponse = Tuple[Union[None, bool], bytes]
+CallResponse = tuple[None | bool, bytes]
 
 concat: Final = toolz.concat  # type: ignore [attr-defined]
 mapcat: Final = toolz.mapcat  # type: ignore [attr-defined]
 
 
-def get_args(calls: List[Call], require_success: bool = True) -> List[Union[bool, List[List[Any]]]]:
+def get_args(calls: list[Call], require_success: bool = True) -> list[bool | list[list[Any]]]:
     if any(call.gas is not None for call in calls):
         return [
             [
@@ -66,33 +56,33 @@ def get_args(calls: List[Call], require_success: bool = True) -> List[Union[bool
     return [require_success, [[call.target, call.data] for call in calls]]
 
 
-def unpack_aggregate_outputs(outputs: Any) -> Tuple[CallResponse, ...]:
+def unpack_aggregate_outputs(outputs: Any) -> tuple[CallResponse, ...]:
     return tuple((None, output) for output in outputs)
 
 
 @final
 class Multicall:
     __slots__ = (
-        "calls",
         "block_id",
-        "require_success",
+        "calls",
+        "chainid",
         "gas_limit",
         "gas_limited",
-        "w3",
-        "chainid",
         "multicall_address",
         "origin",
+        "require_success",
+        "w3",
     )
 
     def __init__(
         self,
-        calls: List[Call],
-        block_id: Optional[int] = None,
+        calls: list[Call],
+        block_id: int | None = None,
         require_success: bool = True,
         gas_limit: int = GAS_LIMIT,
         _w3: Web3 = w3,
-        origin: Optional[AnyAddress] = None,
-        _chain_id: Optional[int] = None,
+        origin: AnyAddress | None = None,
+        _chain_id: int | None = None,
     ) -> None:
         self.calls: Final = calls
         self.block_id = block_id
@@ -117,13 +107,13 @@ class Multicall:
         )
         self.multicall_address: Final = multicall_map[chainid]
 
-    def __call__(self) -> Dict[str, Any]:
+    def __call__(self) -> dict[str, Any]:
         start = time()
         response = await_awaitable(self)
         log_debug("Multicall took %ss", time() - start)
         return response
 
-    def __await__(self) -> Generator[Any, Any, Dict[str, Any]]:
+    def __await__(self) -> Generator[Any, Any, dict[str, Any]]:
         return self.coroutine().__await__()
 
     @property
@@ -136,7 +126,7 @@ class Multicall:
             else "tryBlockAndAggregate(bool,(address,bytes)[])(uint256,uint256,(bool,bytes)[])"
         )
 
-    async def coroutine(self) -> Dict[str, Any]:
+    async def coroutine(self) -> dict[str, Any]:
         batches = await gather(
             [
                 self.fetch_outputs(batch, id=str(i))
@@ -193,8 +183,8 @@ class Multicall:
         self._contract_method(signature, return_signature)
 
     async def fetch_outputs(
-        self, calls: List[Call], ConnErr_retries: int = 0, id: str = ""
-    ) -> List[CallResponse]:
+        self, calls: list[Call], ConnErr_retries: int = 0, id: str = ""
+    ) -> list[CallResponse]:
         log_debug("coroutine %s started", id)
 
         if calls is None:
@@ -277,7 +267,7 @@ class NotSoBrightBatcher:
     def __init__(self) -> None:
         self.step = 10000
 
-    def batch_calls(self, calls: List[Call], step: int) -> List[List[Call]]:
+    def batch_calls(self, calls: list[Call], step: int) -> list[list[Call]]:
         """
         Batch calls into chunks of at most `step` calls (at least 1), covering every call.
         An empty list yields one empty batch.
@@ -286,8 +276,8 @@ class NotSoBrightBatcher:
         return [calls[start : start + step] for start in range(0, len(calls), step)] or [calls]
 
     def split_calls(
-        self, calls: List[Call], unused: Optional[int] = None
-    ) -> Tuple[List[Call], List[Call]]:
+        self, calls: list[Call], unused: int | None = None
+    ) -> tuple[list[Call], list[Call]]:
         """
         Split calls into 2 batches in case request is too large.
         We do this to help us find optimal `self.step` value.
@@ -297,7 +287,7 @@ class NotSoBrightBatcher:
         chunk_2 = calls[center:]
         return chunk_1, chunk_2
 
-    def rebatch(self, calls: List[Call]) -> Sequence[List[Call]]:
+    def rebatch(self, calls: list[Call]) -> Sequence[list[Call]]:
         # If a separate coroutine changed `step` after calls were last batched, we will use the new `step` for rebatching.
         if self.step <= len(calls) // 2:
             return self.batch_calls(calls, self.step)
@@ -317,7 +307,7 @@ batcher: Final = NotSoBrightBatcher()
 
 def _raise_or_proceed(e: Exception, ct_calls: int, ConnErr_retries: int) -> None:
     """Depending on the exception, either raises or ignores and allows `batcher` to rebatch."""
-    strings: Tuple[str, ...]
+    strings: tuple[str, ...]
     if isinstance(e, aiohttp.ClientOSError):
         if "broken pipe" not in str(e).lower():
             raise e
@@ -346,13 +336,7 @@ def _raise_or_proceed(e: Exception, ct_calls: int, ConnErr_retries: int) -> None
         log_warning(e)
     elif isinstance(e, TimeoutError):
         pass
-    elif isinstance(e, ValueError):
-        if "out of gas" not in str(e).lower():
-            raise e
-        if ct_calls == 1:
-            raise e
-        log_warning(e)
-    elif Web3RPCError is not None and isinstance(e, Web3RPCError):
+    elif isinstance(e, Web3RPCError):
         strings = (
             "out of gas",
             "request body size limit",

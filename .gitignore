@@ -9,10 +9,3 @@ multicall.egg-info
 
 # IDE
 .idea
-
-# C stuff
-*.o
-*.so
-build/ops.txt
-build/**/*.py
-build/**/py.typed

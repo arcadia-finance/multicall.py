@@ -36,8 +36,3 @@ def test_web3rpcerror_body_size_limit_is_rebatchable():
 def test_web3rpcerror_unrelated_raises():
     with pytest.raises(Web3RPCError):
         _raise_or_proceed(Web3RPCError("execution reverted"), ct_calls=100, ConnErr_retries=0)
-
-
-def test_valueerror_out_of_gas_still_rebatchable():
-    # web3 < 7 surfaces RPC errors as ValueError; behavior must be preserved.
-    _raise_or_proceed(ValueError(OUT_OF_GAS_MSG), ct_calls=100, ConnErr_retries=0)

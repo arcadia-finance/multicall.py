@@ -1,5 +1,7 @@
 from decimal import Decimal
+
 from web3.datastructures import AttributeDict
+
 from multicall import Call, Multicall
 
 MCD_VAT = "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b"

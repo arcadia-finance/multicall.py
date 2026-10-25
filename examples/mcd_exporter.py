@@ -1,8 +1,10 @@
 import time
-from functools import partial
 from decimal import Decimal
+from functools import partial
+
+from prometheus_client import Gauge, start_http_server
+
 from multicall import Call, Multicall
-from prometheus_client import start_http_server, Gauge
 
 MCD_VAT = "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b"
 MCD_VOW = "0xa950524441892a31ebddf91d3ceefa04bf454466"
@@ -61,18 +63,6 @@ params = [
     "flop_kicks",
     "flap_kicks",
 ]
-
-
-def from_wad(value):
-    return Decimal(value) / 10**18
-
-
-def from_ray(value):
-    return Decimal(value) / 10**27
-
-
-def from_rad(value):
-    return Decimal(value) / 10**45
 
 
 def from_wei(value, decimals=18):
