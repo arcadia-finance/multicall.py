@@ -6,7 +6,7 @@
 
 int CPyGlobalsInit(void);
 
-extern PyObject *CPyStatics[448];
+extern PyObject *CPyStatics[446];
 extern const char * const CPyLit_Str[];
 extern const char * const CPyLit_Bytes[];
 extern const char * const CPyLit_Int[];
@@ -20,9 +20,9 @@ extern PyObject *CPyStatic_call___globals;
 extern CPyModule *CPyModule_builtins;
 extern CPyModule *CPyModule_typing;
 extern CPyModule *CPyModule_eth_retry;
-extern CPyModule *CPyModule_cchecksum;
 extern CPyModule *CPyModule_eth_typing;
 extern CPyModule *CPyModule_eth_typing___abi;
+extern CPyModule *CPyModule_eth_utils;
 extern CPyModule *CPyModule_web3;
 extern CPyModule *CPyModule_multicall___constants__internal;
 extern CPyModule *CPyModule_multicall___constants;
@@ -48,7 +48,6 @@ extern PyObject *CPyStatic_multicall___globals;
 extern CPyModule *CPyModule_asyncio;
 extern CPyModule *CPyModule_time;
 extern CPyModule *CPyModule_requests;
-extern CPyModule *CPyModule_eth_utils;
 extern CPyModule *CPyModule_web3___exceptions;
 extern PyObject *CPyStatic_signature___globals;
 extern CPyModule *CPyModule_eth_abi___abi;
@@ -193,7 +192,6 @@ extern char CPyDef_loggers_____top_level__(void);
 extern PyObject *CPyStatic_multicall___logger;
 extern PyObject *CPyStatic_multicall___log_warning;
 extern PyObject *CPyStatic_multicall___log_debug;
-extern PyObject *CPyStatic_multicall___to_checksum_address;
 extern PyObject *CPyStatic_multicall___concat;
 extern PyObject *CPyStatic_multicall___mapcat;
 extern PyObject *CPyStatic_multicall___multicall___multicall___Multicall_____init______w3;
