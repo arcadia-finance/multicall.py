@@ -1,6 +1,6 @@
 """Unit tests for _raise_or_proceed error classification.
 
-These tests are self-contained (no network, no brownie); run with:
+These tests are self-contained (no network); run with:
     pytest tests/test_raise_or_proceed.py
 """
 

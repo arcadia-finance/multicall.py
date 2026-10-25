@@ -66,10 +66,7 @@ def test_await_awaitable_in_the_main_thread_without_warnings():
         "assert await_awaitable(answer()) == 42\n"
         "get_event_loop().close()\n"
     )
-    ignore_web3_import = "ignore:websockets.legacy is deprecated:DeprecationWarning"
-    subprocess.run(
-        [sys.executable, "-W", "error", "-W", ignore_web3_import, "-c", code], check=True
-    )
+    subprocess.run([sys.executable, "-W", "error", "-c", code], check=True)
 
 
 def test_a_running_loop_is_returned():

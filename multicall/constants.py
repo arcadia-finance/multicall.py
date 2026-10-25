@@ -6,14 +6,7 @@ from aiohttp import ClientTimeout
 from eth_typing import ChecksumAddress, HexStr
 from web3.auto import w3 as auto_w3
 
-# If brownie is installed and connected, we will use brownie's Web3
-# Otherwise, we will use w3 from web3py.
-try:
-    from brownie import network, web3  # type: ignore
-except ImportError:
-    w3 = auto_w3
-else:
-    w3 = web3 if network.is_connected() else auto_w3
+w3: Final = auto_w3
 
 
 GAS_LIMIT: Final = int(os.environ.get("GAS_LIMIT", "50000000"))

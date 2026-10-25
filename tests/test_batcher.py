@@ -1,6 +1,6 @@
 """Unit tests for NotSoBrightBatcher and the single-call rebatch guard.
 
-Self-contained (no network, no brownie); run with:
+Self-contained (no network); run with:
     pytest tests/test_batcher.py
 """
 
