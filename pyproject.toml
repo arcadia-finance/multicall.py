@@ -40,7 +40,7 @@ multicall = ["py.typed"]
 
 [tool.uv]
 exclude-newer = "4 weeks"
-exclude-newer-package = { aiohttp = "2026-10-06T00:00:00Z", certifi = "2026-10-21T00:00:00Z" }
+exclude-newer-package = { aiohttp = "1 week", certifi = "1 day" }
 
 [tool.ruff]
 line-length = 100
