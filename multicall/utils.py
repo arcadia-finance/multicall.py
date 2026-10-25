@@ -2,13 +2,17 @@ from asyncio import AbstractEventLoop, Semaphore, get_running_loop, new_event_lo
 from asyncio import gather as _gather
 from asyncio import get_event_loop as _get_event_loop
 from collections.abc import Awaitable, Iterable
+from functools import lru_cache
 from typing import Any, Final
 
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
+from eth_utils import to_checksum_address as _to_checksum_address
 from web3 import AsyncHTTPProvider, AsyncWeb3, HTTPProvider, Web3
 from web3.providers.async_base import AsyncBaseProvider
 
 from multicall.constants import AIOHTTP_TIMEOUT, ASYNC_SEMAPHORE, NO_STATE_OVERRIDE
+
+to_checksum_address: Final = lru_cache(maxsize=4096)(_to_checksum_address)
 
 chainids: Final[dict[Web3, int]] = {}
 

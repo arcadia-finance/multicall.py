@@ -1,7 +1,7 @@
 """Unit tests for NotSoBrightBatcher and the single-call rebatch guard.
 
 Self-contained (no network, no brownie); run with:
-    pytest --noconftest tests/test_batcher.py
+    pytest tests/test_batcher.py
 """
 
 import asyncio

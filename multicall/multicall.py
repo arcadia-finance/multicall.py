@@ -10,7 +10,7 @@ from typing import (
 import aiohttp
 import requests
 from eth_typing import AnyAddress
-from eth_utils import to_checksum_address, toolz
+from eth_utils import toolz
 from web3 import Web3
 from web3.exceptions import Web3RPCError
 
@@ -31,6 +31,7 @@ from multicall.utils import (
     chainids,
     gather,
     state_override_supported,
+    to_checksum_address,
 )
 
 logger: Final = setup_logger(__name__)

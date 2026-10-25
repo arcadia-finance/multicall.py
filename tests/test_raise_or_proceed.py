@@ -1,7 +1,7 @@
 """Unit tests for _raise_or_proceed error classification.
 
 These tests are self-contained (no network, no brownie); run with:
-    pytest --noconftest tests/test_raise_or_proceed.py
+    pytest tests/test_raise_or_proceed.py
 """
 
 import pytest

@@ -8,7 +8,6 @@ from typing import (
 from eth_abi.exceptions import DecodingError
 from eth_typing import Address, ChecksumAddress, HexAddress, HexStr
 from eth_typing.abi import Decodable
-from eth_utils import to_checksum_address
 from web3 import Web3
 
 from multicall.constants import Network, w3
@@ -20,6 +19,7 @@ from multicall.utils import (
     chain_id,
     get_async_w3,
     state_override_supported,
+    to_checksum_address,
 )
 
 logger: Final = setup_logger(__name__)
