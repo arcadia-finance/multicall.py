@@ -464,6 +464,11 @@ wheels = [
 ]
 
 [[package]]
+name = "eth-retry"
+version = "0.3.8"
+source = { git = "https://github.com/arcadia-finance/eth_retry.git?rev=5249e48a0cdeb5bc6862bc98dccd7ddbee663568#5249e48a0cdeb5bc6862bc98dccd7ddbee663568" }
+
+[[package]]
 name = "eth-rlp"
 version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -587,12 +592,13 @@ wheels = [
 
 [[package]]
 name = "multicall"
-version = "0.16.0"
+version = "0.16.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
     { name = "eth-abi" },
     { name = "eth-hash" },
+    { name = "eth-retry" },
     { name = "eth-typing" },
     { name = "eth-utils" },
     { name = "requests" },
@@ -611,6 +617,7 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.14.3" },
     { name = "eth-abi", specifier = ">=6.0.0" },
     { name = "eth-hash", specifier = ">=0.8.0" },
+    { name = "eth-retry", git = "https://github.com/arcadia-finance/eth_retry.git?rev=5249e48a0cdeb5bc6862bc98dccd7ddbee663568" },
     { name = "eth-typing", specifier = ">=6.0.0" },
     { name = "eth-utils", specifier = ">=6.0.0" },
     { name = "requests", specifier = ">=2.34.2" },

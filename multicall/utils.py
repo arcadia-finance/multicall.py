@@ -5,6 +5,7 @@ from collections.abc import Awaitable, Iterable
 from functools import lru_cache
 from typing import Any, Final
 
+import eth_retry
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from eth_utils import to_checksum_address as _to_checksum_address
 from web3 import AsyncHTTPProvider, AsyncWeb3, HTTPProvider, Web3
@@ -17,6 +18,7 @@ to_checksum_address: Final = lru_cache(maxsize=4096)(_to_checksum_address)
 chainids: Final[dict[Web3, int]] = {}
 
 
+@eth_retry.auto_retry(min_sleep_time=1, max_sleep_time=2)
 def chain_id(w3: Web3) -> int:
     """
     Returns chain id for an instance of Web3. Helps save repeat calls to node.

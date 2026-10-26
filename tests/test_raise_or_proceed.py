@@ -7,6 +7,7 @@ These tests are self-contained (no network); run with:
 import pytest
 from web3.exceptions import Web3RPCError
 
+from multicall.exceptions import EVMTimeout
 from multicall.multicall import _raise_or_proceed
 
 OUT_OF_GAS_MSG = (
@@ -41,10 +42,15 @@ def test_web3rpcerror_unrelated_raises():
 EVM_TIMEOUT_MSG = "{'code': -32000, 'message': 'execution aborted (timeout = 5s)'}"
 
 
-def test_web3rpcerror_evm_timeout_is_rebatchable():
-    _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=100, ConnErr_retries=0)
+def test_evm_timeout_is_rebatchable():
+    _raise_or_proceed(EVMTimeout(EVM_TIMEOUT_MSG), ct_calls=100, ConnErr_retries=0)
 
 
-def test_web3rpcerror_evm_timeout_single_call_raises():
+def test_evm_timeout_single_call_raises():
+    with pytest.raises(EVMTimeout):
+        _raise_or_proceed(EVMTimeout(EVM_TIMEOUT_MSG), ct_calls=1, ConnErr_retries=0)
+
+
+def test_an_unwrapped_evm_timeout_message_is_not_rebatched():
     with pytest.raises(Web3RPCError):
-        _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=1, ConnErr_retries=0)
+        _raise_or_proceed(Web3RPCError(EVM_TIMEOUT_MSG), ct_calls=100, ConnErr_retries=0)
