@@ -23,6 +23,7 @@ from multicall.constants import (
     MULTICALL4_BYTECODE,
     w3,
 )
+from multicall.exceptions import EVMTimeout
 from multicall.loggers import setup_logger
 from multicall.utils import (
     _get_semaphore,
@@ -337,10 +338,13 @@ def _raise_or_proceed(e: Exception, ct_calls: int, ConnErr_retries: int) -> None
         log_warning(e)
     elif isinstance(e, TimeoutError):
         pass
+    elif isinstance(e, EVMTimeout):
+        if ct_calls == 1:
+            raise e
+        log_warning(e)
     elif isinstance(e, Web3RPCError):
         strings = (
             "out of gas",
-            "execution aborted (timeout",
             "request body size limit",
             "request entity too large",
             "payload too large",

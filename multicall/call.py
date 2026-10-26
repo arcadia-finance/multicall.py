@@ -10,9 +10,10 @@ from eth_abi.exceptions import DecodingError
 from eth_typing import Address, ChecksumAddress, HexAddress, HexStr
 from eth_typing.abi import Decodable
 from web3 import Web3
+from web3.exceptions import Web3RPCError
 
 from multicall.constants import Network, w3
-from multicall.exceptions import StateOverrideNotSupported
+from multicall.exceptions import EVMTimeout, StateOverrideNotSupported
 from multicall.loggers import setup_logger
 from multicall.signature import Signature, _get_signature
 from multicall.utils import (
@@ -164,17 +165,24 @@ class Call:
             )
 
         async with _get_semaphore():
-            output = await (await get_async_w3(_w3)).eth.call(  # type: ignore [misc]
-                *prep_args(
-                    self.target,
-                    self.signature,
-                    args or self.args,
-                    block_id or self.block_id,
-                    self.origin,
-                    self.gas_limit,
-                    self.state_override_code,
+            try:
+                output = await (await get_async_w3(_w3)).eth.call(  # type: ignore [misc]
+                    *prep_args(
+                        self.target,
+                        self.signature,
+                        args or self.args,
+                        block_id or self.block_id,
+                        self.origin,
+                        self.gas_limit,
+                        self.state_override_code,
+                    )
                 )
-            )
+            except Web3RPCError as e:
+                if "execution aborted (timeout" in str(e).lower():
+                    raise EVMTimeout(
+                        "node EVM execution timed out", rpc_response=e.rpc_response
+                    ) from e
+                raise
 
         result = Call.decode_output(output, self.signature, self.returns)
         log_debug("%s returned %s", self, result)

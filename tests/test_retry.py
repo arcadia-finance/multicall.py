@@ -7,12 +7,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import pytest
 from web3 import Web3
 
+import multicall.multicall as multicall_module
 from multicall import Call, Multicall
+from multicall.exceptions import EVMTimeout
 from multicall.utils import chainids, close_async_w3s
 from tests.test_stub_rpc import ALICE, BOB, TOKEN, _answer
 
 RATE_LIMIT = {"code": 429, "message": "Too many requests"}
 REVERT = {"code": 3, "message": "execution reverted"}
+EVM_TIMEOUT = {"code": -32000, "message": "execution aborted (timeout = 5s)"}
 
 
 class _ScriptedHandler(BaseHTTPRequestHandler):
@@ -127,3 +130,12 @@ def test_a_revert_is_not_retried(scripted_rpc):
     with pytest.raises(Exception, match="execution reverted"):
         Call(TOKEN, ["balanceOf(address)(uint256)", BOB], None, _w3=w3)()
     assert server.methods.count("eth_call") == 1
+
+
+def test_an_evm_timeout_splits_the_batch_without_retrying(scripted_rpc, monkeypatch):
+    server, w3 = scripted_rpc
+    monkeypatch.setattr(multicall_module.batcher, "step", multicall_module.batcher.step)
+    server.script = {"eth_call": [EVM_TIMEOUT] * 3}
+    with pytest.raises(EVMTimeout):
+        _run_multicall(w3)
+    assert server.methods.count("eth_call") == 3
