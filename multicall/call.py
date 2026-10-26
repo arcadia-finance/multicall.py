@@ -5,6 +5,7 @@ from typing import (
     final,
 )
 
+import eth_retry
 from eth_abi.exceptions import DecodingError
 from eth_typing import Address, ChecksumAddress, HexAddress, HexStr
 from eth_typing.abi import Decodable
@@ -118,6 +119,7 @@ class Call:
         else:
             return decoded if len(decoded) > 1 else decoded[0]
 
+    @eth_retry.auto_retry(min_sleep_time=1, max_sleep_time=3)
     def __call__(
         self,
         args: Any | None = None,
@@ -146,6 +148,7 @@ class Call:
     def __await__(self) -> Generator[Any, Any, Any]:
         return self.coroutine().__await__()
 
+    @eth_retry.auto_retry(min_sleep_time=1, max_sleep_time=3)
     async def coroutine(
         self,
         args: Any | None = None,
