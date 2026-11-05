@@ -64,6 +64,7 @@ class Network(IntEnum):
     Kava = 2222
     FantomTestnet = 4002
     Robinhood = 4663
+    Arc = 5042
     Canto = 7700
     Klaytn = 8217
     Base = 8453
@@ -75,6 +76,7 @@ class Network(IntEnum):
     Oasis = 42262
     AvalancheFuji = 43113
     Avax = 43114
+    Ink = 57073
     GodwokenTestnet = 71401
     Godwoken = 71402
     Mumbai = 80001
@@ -188,6 +190,8 @@ MULTICALL3_ADDRESSES: Final[dict[int, ChecksumAddress]] = {
     Network.PulseChainTestnet: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Base: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Robinhood: "0xcA11bde05977b3631167028862bE2a173976CA11",
+    Network.Arc: "0xcA11bde05977b3631167028862bE2a173976CA11",
+    Network.Ink: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Holesky: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Sei: "0xcA11bde05977b3631167028862bE2a173976CA11",
     Network.Hoodi: "0xca11bde05977b3631167028862be2a173976ca11",
